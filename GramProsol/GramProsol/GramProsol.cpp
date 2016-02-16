@@ -115,10 +115,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			MessageBoxW(NULL, L"Error", L"Equation edit window creation failed", NULL);
 			SendMessage(hWnd, WM_DESTROY, NULL, NULL);
 		}
-	
 
-		g_cChart = new Chart(&QuadraticEquation, 1, 100, RESOLUTION);
-		g_vDots = g_cChart->getGrainVector(RESOLUTION);
+		/////////////
+		//CHART CREATION 
+		/////////////
+		g_cChart = new Chart(&QuadraticEquation, -1, 2, RESOLUTION);
+
 		break;
 
     case WM_COMMAND:
@@ -143,12 +145,19 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 			PAINTSTRUCT psPlot;
 			HDC hdcPlot = BeginPaint(g_hwndPlot, &psPlot);
-			std::vector<Chart::DotPosition<UINT>>* LineXVector = g_cChart->GetLineXVectorPtr();
+
+			std::vector<Chart::DotPosition<UINT>>* LineYVector = g_cChart->getLineYVectorPtr();
+			std::vector<Chart::DotPosition<UINT>>* LineXVector = g_cChart->getLineXVectorPtr();
+			std::vector<Chart::DotPosition<UINT>>* GrainVector = g_cChart->getGrainVectorPtr();
 
 			for (int i = 0; i < RESOLUTION; i++)
 			{
-				SetPixel(hdcPlot, (*g_vDots)[i].X, RESOLUTION-(*g_vDots)[i].Y, RGB(0, 0, 0));
-				SetPixel(hdcPlot, (*LineXVector)[i].X, (*LineXVector)[i].Y, RGB(255, 0, 0));
+				SetPixel(hdcPlot, (*GrainVector)[i].X, RESOLUTION - (*GrainVector)[i].Y, RGB(0, 0, 0));
+
+				if(LineXVector!=NULL)
+					SetPixel(hdcPlot, (*LineXVector)[i].X, (*LineXVector)[i].Y, RGB(255, 0, 0));
+				if(LineYVector != NULL)
+					SetPixel(hdcPlot, (*LineYVector)[i].X, (*LineYVector)[i].Y, RGB(255, 0, 0));
 			}
 			SetPixel(hdcPlot, 200, 400, RGB(0, 255, 0));
 			EndPaint(g_hwndPlot, &psPlot);
@@ -157,7 +166,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	
     case WM_DESTROY:
 		delete g_cChart;
-		delete g_vDots;
         PostQuitMessage(0);
         break;
     default:

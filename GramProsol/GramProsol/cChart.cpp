@@ -4,7 +4,7 @@
 #include <algorithm>
 using namespace std;
 
-Chart::Chart(double(*f_pEquation_h)(double), double dIntervalA_h, double dIntervalB_h, UINT uiResolution) 
+Chart::Chart(double(*f_pEquation_h)(double), double dIntervalA_h, double dIntervalB_h, UINT uResolution) 
 {
 	if (dIntervalA_h > dIntervalB_h)
 		MessageBox(NULL, L"A>B", L"Error", NULL);
@@ -35,7 +35,7 @@ Chart::Chart(double(*f_pEquation_h)(double), double dIntervalA_h, double dInterv
 	}
 	
 	dBoundryXLeft = dIntervalA;
-	dBoundryXRright = dIntervalB;
+	dBoundryXRight = dIntervalB;
 
 	//if function is constant we will get division by zero later on
 	if (dMaxElement != dMinElement)
@@ -49,7 +49,9 @@ Chart::Chart(double(*f_pEquation_h)(double), double dIntervalA_h, double dInterv
 		dBoundryYDown = dMinElement - 1;
 	}
 
-	LineXVector = getLineXVector(uiResolution);
+	GrainVector = createGrainVector(uResolution);
+	LineXVector = createLineXVector(uResolution);
+	LineYVector = createLineYVector(uResolution);
 
 };
 
@@ -58,11 +60,11 @@ Chart::~Chart()
 	f_pEquation = NULL;
 }
 
-vector<Chart::DotPosition<int>>* Chart::getGrainVector(UINT uResolution)
+vector<Chart::DotPosition<UINT>>* Chart::createGrainVector(UINT uResolution)
 {
-	vector<DotPosition<int>>* vResult = new vector<DotPosition<int>>(uResolution);
+	vector<DotPosition<UINT>>* vResult = new vector<DotPosition<UINT>>(uResolution);
 	vector<DotPosition<double>> vBuffer(uResolution);
-	double dGrainSizeX =  (dBoundryXRright - dBoundryXLeft) / (double)uResolution;
+	double dGrainSizeX =  (dBoundryXRight - dBoundryXLeft) / (double)uResolution;
 	double dGrainSizeY = (dBoundryYUp- dBoundryYDown) / (double)uResolution;
 	for (UINT i = 0; i < uResolution; i++)
 	{
@@ -71,23 +73,41 @@ vector<Chart::DotPosition<int>>* Chart::getGrainVector(UINT uResolution)
 		
 		vBuffer[i].X = i;
 		vBuffer[i].Y = (vBuffer[i].Y - dBoundryYDown) * ((double)uResolution / (dBoundryYUp - dBoundryYDown));
-		CHAR str[256];
-		sprintf_s(str, "buffery %f  :  %f , intervat to %f \n", (float)vBuffer[i].Y, vBuffer[i].X, (float)dIntervalA);
-		OutputDebugStringA(str);
-		(*vResult)[i].X = (int)(vBuffer[i].X+0.5);
-		(*vResult)[i].Y = (int)(vBuffer[i].Y+0.5);
+		
+		(*vResult)[i].X = (UINT)(vBuffer[i].X+0.5);
+		(*vResult)[i].Y = (UINT)(vBuffer[i].Y+0.5);
 	}
 	return vResult;
 }
 
-std::vector<Chart::DotPosition<UINT>>* Chart::getLineXVector(UINT uResolution)
+std::vector<Chart::DotPosition<UINT>>* Chart::createLineXVector(UINT uResolution)
 {
+	if (dBoundryYUp <= 0 || dBoundryYDown >= 0)
+		return NULL;
+
 	vector<DotPosition<UINT>>* vResult = new vector<DotPosition<UINT>>(uResolution);
 	double GrainSizeY = (double)uResolution/ (dBoundryYUp - dBoundryYDown) ;
 	for (UINT i = 0; i < uResolution; i++)
 	{
 		(*vResult)[i].X = i;
 		(*vResult)[i].Y = UINT((dBoundryYUp* GrainSizeY)+0.5);
+	}
+	return vResult;
+
+
+}
+
+std::vector<Chart::DotPosition<UINT>>* Chart::createLineYVector(UINT uResolution)
+{
+	if (dBoundryXLeft >= 0 || dBoundryXRight <= 0)
+		return NULL;
+
+	vector<DotPosition<UINT>>* vResult = new vector<DotPosition<UINT>>(uResolution);
+	double GrainSizeX = (double)uResolution / (dBoundryXLeft - dBoundryXRight);
+	for (UINT i = 0; i < uResolution; i++)
+	{
+		(*vResult)[i].X = UINT((dBoundryXLeft* GrainSizeX) + 0.5);
+		(*vResult)[i].Y = i;
 	}
 	return vResult;
 

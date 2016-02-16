@@ -18,7 +18,7 @@ private:
 	double (*f_pEquation)(double);
 
 	double dBoundryXLeft;
-	double dBoundryXRright;
+	double dBoundryXRight;
 	double dBoundryYUp;
 	double dBoundryYDown;
 	
@@ -27,19 +27,27 @@ private:
 	double dIntervalB;
 
 	std::vector<DotPosition<UINT>>* LineXVector;
+	std::vector<DotPosition<UINT>>* LineYVector;
+	std::vector<DotPosition<UINT>>* GrainVector;
 
-	std::vector<DotPosition<UINT>>* getLineXVector(UINT uResolution);
+	std::vector<DotPosition<UINT>>* createLineXVector(UINT uResolution);
+	std::vector<DotPosition<UINT>>* createLineYVector(UINT uResolution);
+
+	std::vector<DotPosition<UINT>>* createGrainVector(UINT uResolution);
+
+
 public:
+	std::vector<DotPosition<UINT>>* getLineXVectorPtr()
+	{return LineXVector;}
+	std::vector<DotPosition<UINT>>* getLineYVectorPtr()
+	{return LineYVector;}
+	std::vector<DotPosition<UINT>>* getGrainVectorPtr()
+	{return GrainVector;}
 	
-	std::vector<DotPosition<UINT>>* GetLineXVectorPtr()
-	{
-		return LineXVector;
-	}
-	std::vector<DotPosition<int>>* getGrainVector(UINT uResolution);
 	
 	Chart(double(*)(double), double, double, UINT uiResolution); 
 	~Chart();
 
 
-	
+	 
 };
