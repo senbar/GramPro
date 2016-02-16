@@ -17,7 +17,7 @@ Chart::Chart(double(*f_pEquation_h)(double), double dIntervalA_h, double dInterv
 	double dMinElement;
 	
 	
-	// finding smallest and bigget element
+	// finding the smallest and the bigget element
 	double dCurrentElement;
 	for (int i = 0; i < 100; i++) 
 	{
