@@ -117,7 +117,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		}
 	
 
-		g_cChart = new Chart(&QuadraticEquation, -1, 1);
+		g_cChart = new Chart(&QuadraticEquation, 1, 100, RESOLUTION);
 		g_vDots = g_cChart->getGrainVector(RESOLUTION);
 		break;
 
@@ -143,11 +143,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 			PAINTSTRUCT psPlot;
 			HDC hdcPlot = BeginPaint(g_hwndPlot, &psPlot);
-			
+			std::vector<Chart::DotPosition<UINT>>* LineXVector = g_cChart->GetLineXVectorPtr();
 
 			for (int i = 0; i < RESOLUTION; i++)
 			{
-				SetPixel(hdcPlot, g_vDots[i].X, RESOLUTION-g_vDots[i].Y, RGB(0, 0, 0));
+				SetPixel(hdcPlot, (*g_vDots)[i].X, RESOLUTION-(*g_vDots)[i].Y, RGB(0, 0, 0));
+				SetPixel(hdcPlot, (*LineXVector)[i].X, (*LineXVector)[i].Y, RGB(255, 0, 0));
 			}
 			SetPixel(hdcPlot, 200, 400, RGB(0, 255, 0));
 			EndPaint(g_hwndPlot, &psPlot);
@@ -155,6 +156,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         break;
 	
     case WM_DESTROY:
+		delete g_cChart;
+		delete g_vDots;
         PostQuitMessage(0);
         break;
     default:

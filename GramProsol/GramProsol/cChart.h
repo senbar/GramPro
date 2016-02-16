@@ -5,6 +5,14 @@
 
 class Chart
 {
+public:
+	template <typename var>
+	struct DotPosition
+	{
+	public:
+		var X;
+		var Y;
+	};
 private:
 
 	double (*f_pEquation)(double);
@@ -18,18 +26,18 @@ private:
 	double dIntervalA;
 	double dIntervalB;
 
+	std::vector<DotPosition<UINT>>* LineXVector;
 
+	std::vector<DotPosition<UINT>>* getLineXVector(UINT uResolution);
 public:
-	template <typename var>
-	struct DotPosition
+	
+	std::vector<DotPosition<UINT>>* GetLineXVectorPtr()
 	{
-	public:
-		var X;
-		var Y;
-	};
-
-	std::vector<DotPosition<int>> getGrainVector(UINT uResolution);
-	Chart(double(*)(double), double, double); 
+		return LineXVector;
+	}
+	std::vector<DotPosition<int>>* getGrainVector(UINT uResolution);
+	
+	Chart(double(*)(double), double, double, UINT uiResolution); 
 	~Chart();
 
 

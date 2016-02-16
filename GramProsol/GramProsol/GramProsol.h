@@ -9,7 +9,7 @@ Chart* g_cChart;
 
 
 double QuadraticEquation(double);
-std::vector<Chart::DotPosition<int>> g_vDots;
+std::vector<Chart::DotPosition<int>>* g_vDots;
 
 #define CHART_WIDTH 400
 #define CHART_HEIGHT 400
