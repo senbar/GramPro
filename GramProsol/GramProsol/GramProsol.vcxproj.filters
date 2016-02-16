@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="cChart">
+      <UniqueIdentifier>{e63b7071-3dda-4e43-b12e-f13da1c2c530}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -30,6 +33,9 @@
     <ClInclude Include="GramProsol.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="cChart.h">
+      <Filter>cChart</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -37,6 +43,9 @@
     </ClCompile>
     <ClCompile Include="GramProsol.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cChart.cpp">
+      <Filter>cChart</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
