@@ -104,22 +104,26 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     switch (message)
     {
 	case WM_CREATE:
-		g_hwndPlot = CreateWindowExW(NULL , L"STATIC", L"test", WS_CHILD | WS_VISIBLE | WS_BORDER, 0, 0, CHART_WIDTH, CHART_HEIGHT+3, hWnd, (HMENU)IDC_STATIC, hInst, NULL);
-		if (g_hwndPlot==NULL)
+		try {
+			g_hwndPlot = CreateWindowExW(NULL, L"STATIC", L"test", WS_CHILD | WS_VISIBLE | WS_BORDER, 0, 0, CHART_WIDTH, CHART_HEIGHT + 3, hWnd, (HMENU)IDC_STATIC, hInst, NULL);
+			if (g_hwndPlot == NULL)
+				throw(L"STATIC ERROR");
+			if (CreateWindowExW(NULL, L"EDIT", L"Equation edit", WS_CHILD | WS_VISIBLE | WS_BORDER, 450, 100, 300, 20, hWnd, (HMENU)IDD_EQUATION_DIALOGBAR, hInst, NULL) == NULL)
+				throw(L"EQUATION DIALOGBAR ERROR");
+			if (CreateWindowExW(NULL, L"EDIT", L"Interval from", WS_CHILD | WS_VISIBLE | WS_BORDER, 500, 150, 100, 20, hWnd, (HMENU)IDD_EQUATION_INTERVAL_FROM, hInst, NULL) == NULL)
+				throw(L"EQUATION INTERVAL FROM ERROR");
+			if (CreateWindowExW(NULL, L"EDIT", L"Interval to", WS_CHILD | WS_VISIBLE | WS_BORDER, 400, 150, 100, 20, hWnd, (HMENU)IDD_EQUATION_INTERVAL_TO, hInst, NULL) == NULL)
+				throw(L"EQUATION INTERBAL TO ERROR");
+		}
+		catch (WCHAR* cCatch)
 		{
-			MessageBoxW(NULL, L"Error", L"Plot window creation failed", NULL);
+			MessageBoxW(NULL, L"Error", cCatch, NULL);
 			SendMessage(hWnd, WM_DESTROY, NULL, NULL);
 		}
-		if (CreateWindowExW(NULL, L"EDIT", L"Equation edit", WS_CHILD | WS_VISIBLE | WS_BORDER, 450, 100, 100, 20, hWnd, (HMENU)IDD_EQUATION_DIALOGBAR, hInst, NULL)==NULL)
-		{
-			MessageBoxW(NULL, L"Error", L"Equation edit window creation failed", NULL);
-			SendMessage(hWnd, WM_DESTROY, NULL, NULL);
-		}
-
 		/////////////
 		//CHART CREATION 
 		/////////////
-		g_cChart = new Chart(&QuadraticEquation, -1, 2, RESOLUTION);
+		g_cChart = new Chart(&QuadraticEquation, -2, 2, RESOLUTION);
 
 		break;
 
@@ -128,7 +132,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		switch (LOWORD(wParam))
 		{
 		case IDD_EQUATION_DIALOGBAR:
-			MessageBoxW(NULL, L"Error", L"Equation edit window creation failed", NULL);
+			
 			break;
 
 		}

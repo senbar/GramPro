@@ -44,8 +44,9 @@ public:
 	std::vector<DotPosition<UINT>>* getGrainVectorPtr()
 	{return GrainVector;}
 	
+	BOOL ModifyChart(double (*)(double), double, double, UINT uResolution);
 	
-	Chart(double(*)(double), double, double, UINT uiResolution); 
+	Chart(double (*)(double), double, double, UINT uResolution); 
 	~Chart();
 
 

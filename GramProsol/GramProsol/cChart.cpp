@@ -6,52 +6,15 @@ using namespace std;
 
 Chart::Chart(double(*f_pEquation_h)(double), double dIntervalA_h, double dIntervalB_h, UINT uResolution) 
 {
-	if (dIntervalA_h > dIntervalB_h)
-		MessageBox(NULL, L"A>B", L"Error", NULL);
-
-	f_pEquation = f_pEquation_h;
-	dIntervalA = dIntervalA_h;
-	dIntervalB = dIntervalB_h;
 	
-	double dMaxElement; 
-	double dMinElement;
-	
-	
-	// finding the smallest and the bigget element
-	double dCurrentElement;
-	for (int i = 0; i < 100; i++) 
+	if (!this->ModifyChart(f_pEquation_h, dIntervalA_h, dIntervalB_h, uResolution))
 	{
-		dCurrentElement= f_pEquation(dIntervalA + (((dIntervalB - dIntervalA) / 100)*i));
-		
-		if (i == 0)
-		{
-			dMaxElement = dCurrentElement;
-			dMinElement = dCurrentElement;
-		}
-		if (dMaxElement < dCurrentElement)
-			dMaxElement = dCurrentElement;
-		if (dMinElement > dCurrentElement)
-			dMinElement = dCurrentElement;
-	}
-	
-	dBoundryXLeft = dIntervalA;
-	dBoundryXRight = dIntervalB;
+		MessageBox(NULL, L"error creating Chart class", L"ERR0R", NULL);
 
-	//if function is constant we will get division by zero later on
-	if (dMaxElement != dMinElement)
-	{
-		dBoundryYUp = dMaxElement;
-		dBoundryYDown = dMinElement;
+		LineXVector = new std::vector<DotPosition<UINT>>(uResolution);
+		LineYVector = new std::vector<DotPosition<UINT>>(uResolution);
+		GrainVector = new std::vector<DotPosition<UINT>>(uResolution);
 	}
-	else if (dMaxElement == dMinElement)
-	{
-		dBoundryYUp = dMaxElement + 1;
-		dBoundryYDown = dMinElement - 1;
-	}
-
-	GrainVector = createGrainVector(uResolution);
-	LineXVector = createLineXVector(uResolution);
-	LineYVector = createLineYVector(uResolution);
 
 };
 
@@ -112,4 +75,56 @@ std::vector<Chart::DotPosition<UINT>>* Chart::createLineYVector(UINT uResolution
 	return vResult;
 
 
+}
+
+BOOL Chart::ModifyChart(double (*f_pEquation_h)(double), double dIntervalA_h, double dIntervalB_h, UINT uResolution)
+{
+	if (dIntervalA_h > dIntervalB_h)
+		return 0;
+
+	f_pEquation = f_pEquation_h;
+	dIntervalA = dIntervalA_h;
+	dIntervalB = dIntervalB_h;
+
+	double dMaxElement;
+	double dMinElement;
+
+
+	// finding the smallest and the bigget element
+	double dCurrentElement;
+	for (int i = 0; i < 100; i++)
+	{
+		dCurrentElement = f_pEquation(dIntervalA + (((dIntervalB - dIntervalA) / 100)*i));
+
+		if (i == 0)
+		{
+			dMaxElement = dCurrentElement;
+			dMinElement = dCurrentElement;
+		}
+		if (dMaxElement < dCurrentElement)
+			dMaxElement = dCurrentElement;
+		if (dMinElement > dCurrentElement)
+			dMinElement = dCurrentElement;
+	}
+
+	dBoundryXLeft = dIntervalA;
+	dBoundryXRight = dIntervalB;
+
+	//if function is constant we will get division by zero later on
+	if (dMaxElement != dMinElement)
+	{
+		dBoundryYUp = dMaxElement;
+		dBoundryYDown = dMinElement;
+	}
+	else if (dMaxElement == dMinElement)
+	{
+		dBoundryYUp = dMaxElement + 1;
+		dBoundryYDown = dMinElement - 1;
+	}
+
+	GrainVector = createGrainVector(uResolution);
+	LineXVector = createLineXVector(uResolution);
+	LineYVector = createLineYVector(uResolution);
+
+	return 1;
 }
