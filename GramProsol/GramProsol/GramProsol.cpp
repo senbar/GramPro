@@ -88,7 +88,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
    hInst = hInstance; 
 
    HWND hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX,
-      CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, nullptr, nullptr, hInstance, nullptr);
+      CW_USEDEFAULT, CW_USEDEFAULT, 750, 475, nullptr, nullptr, hInstance, nullptr);
 
    if (!hWnd)
    {
@@ -111,19 +111,25 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			if (g_hwndPlot == NULL)
 				throw(L"STATIC ERROR");
 
+			if(CreateWindowExW(NULL, L"STATIC", L"Who bents our curves:", WS_CHILD | WS_VISIBLE, 415, 150, 400, 20, hWnd, NULL, hInst, NULL)==NULL)
+				throw(L"STATIC ERROR");
 
-			if (CreateWindowExW(NULL, L"EDIT", L"Equation edit", WS_CHILD | WS_VISIBLE | WS_BORDER, 450, 100, 300, 20, hWnd, (HMENU)IDD_EQUATION_DIALOGBAR, hInst, NULL) == NULL)
+			if (CreateWindowExW(NULL, L"EDIT", L"Equation edit", WS_CHILD | WS_VISIBLE | WS_BORDER, 415, 25, 300, 20, hWnd, (HMENU)IDD_EQUATION_DIALOGBAR, hInst, NULL) == NULL)
 				throw(L"EQUATION DIALOGBAR ERROR");
 
 
-			if (CreateWindowExW(NULL, L"EDIT", L"", WS_CHILD | WS_VISIBLE | WS_BORDER | ES_CENTER, 550, 150, 100, 20,
+			if (CreateWindowExW(NULL, L"EDIT", L"", WS_CHILD | WS_VISIBLE | WS_BORDER | ES_CENTER, 415, 50, 100, 20,
 								hWnd, (HMENU)IDD_EQUATION_INTERVAL_FROM, hInst, NULL) == NULL)
 				throw(L"EQUATION INTERVAL FROM ERROR");
 
 
-			if (CreateWindowExW(NULL, L"EDIT", L"", WS_CHILD | WS_VISIBLE | WS_BORDER | ES_CENTER, 450, 150, 100, 20, 
+			if (CreateWindowExW(NULL, L"EDIT", L"", WS_CHILD | WS_VISIBLE | WS_BORDER | ES_CENTER, 525, 50, 100, 20, 
 								hWnd, (HMENU)IDD_EQUATION_INTERVAL_TO, hInst, NULL) == NULL)
 				throw(L"EQUATION INTERBAL TO ERROR");
+
+			if (CreateWindowExW(NULL, L"BUTTON", L"Execute", WS_CHILD | WS_VISIBLE | WS_BORDER | ES_CENTER, 635, 50, 80, 20,
+				hWnd, (HMENU)IDD_BUTTON_EXECUTE, hInst, NULL) == NULL)
+				throw(L"BUTTON ERROR");
 		}
 		catch (WCHAR* cCatch)
 		{
@@ -140,6 +146,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		/////////////
 		g_cChart = new Chart(&QuadraticEquation, -2, 2, RESOLUTION);
 
+		g_bmpTheRippedGuy = NULL;
+		//Create that fucker
+		g_bmpTheRippedGuy = (HBITMAP) LoadImage(NULL, L"POLICJA3.BMP", IMAGE_BITMAP, 0,0, LR_LOADFROMFILE);
+
 		break;
 
 	case WM_COMMAND:
@@ -151,37 +161,61 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	}
 	break;
 
-    case WM_PAINT:
-        {
-            PAINTSTRUCT ps;
-            HDC hdc = BeginPaint(hWnd, &ps);
-            
-            EndPaint(hWnd, &ps);
+	case WM_PAINT:
+	{
+
+		PAINTSTRUCT ps;
+		HDC hdc = BeginPaint(hWnd, &ps);
+
+		EndPaint(hWnd, &ps);
 
 
 
-			PAINTSTRUCT psPlot;
-			HDC hdcPlot = BeginPaint(g_hwndPlot, &psPlot);
+		PAINTSTRUCT psPlot;
+		HDC hdcPlot = BeginPaint(g_hwndPlot, &psPlot);
 
-			std::vector<Chart::DotPosition<UINT>>* LineYVector = g_cChart->getLineYVectorPtr();
-			std::vector<Chart::DotPosition<UINT>>* LineXVector = g_cChart->getLineXVectorPtr();
-			std::vector<Chart::DotPosition<UINT>>* GrainVector = g_cChart->getGrainVectorPtr();
+		std::vector<Chart::DotPosition<UINT>>* LineYVector = g_cChart->getLineYVectorPtr();
+		std::vector<Chart::DotPosition<UINT>>* LineXVector = g_cChart->getLineXVectorPtr();
+		std::vector<Chart::DotPosition<UINT>>* GrainVector = g_cChart->getGrainVectorPtr();
 
-			for (int i = 0; i < RESOLUTION; i++)
-			{
-				SetPixel(hdcPlot, (*GrainVector)[i].X, RESOLUTION - (*GrainVector)[i].Y, RGB(0, 0, 0));
+		for (int i = 0; i < RESOLUTION; i++)
+		{
+			SetPixel(hdcPlot, (*GrainVector)[i].X, RESOLUTION - (*GrainVector)[i].Y, RGB(0, 0, 0));
 
-				if(LineXVector!=NULL)
-					SetPixel(hdcPlot, (*LineXVector)[i].X, (*LineXVector)[i].Y, RGB(255, 0, 0));
-				if(LineYVector != NULL)
-					SetPixel(hdcPlot, (*LineYVector)[i].X, (*LineYVector)[i].Y, RGB(255, 0, 0));
-			}
-			SetPixel(hdcPlot, 200, 400, RGB(0, 255, 0));
-			EndPaint(g_hwndPlot, &psPlot);
-        }
-        break;
+			if (LineXVector != NULL)
+				SetPixel(hdcPlot, (*LineXVector)[i].X, (*LineXVector)[i].Y, RGB(255, 0, 0));
+			if (LineYVector != NULL)
+				SetPixel(hdcPlot, (*LineYVector)[i].X, (*LineYVector)[i].Y, RGB(255, 0, 0));
+		}
+
+		BITMAP bm2;
+
+		SetPixel(hdc, 415, 52, RGB(0, 255, 0));
+		HDC hdcMem = CreateCompatibleDC(hdc);
+		HBITMAP hbmOld = (HBITMAP)SelectObject(hdcMem, g_bmpTheRippedGuy);
+
+		GetObject(g_bmpTheRippedGuy, sizeof(bm2), &bm2);
+
+		StretchBlt(hdc, 415, 175, 300, 225, hdcMem, 0, 0, bm2.bmWidth, bm2.bmHeight, SRCCOPY);
+
+		SelectObject(hdcMem, hbmOld);
+		DeleteDC(hdcMem);
+
+		EndPaint(g_hwndPlot, &psPlot);
+
+
+		//Regulating time
+
+
+		
+
+		
+
+	}
+	break;
 	
     case WM_DESTROY:
+		DeleteObject(g_bmpTheRippedGuy);
 		delete g_cChart;
         PostQuitMessage(0);
         break;
@@ -195,7 +229,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 LRESULT CALLBACK subclassIntervalEditProc(HWND hWnd, UINT uMsg, WPARAM wParam,
 	LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData)
 {
-	if (uMsg == WM_CHAR && wParam >= ' ' && !isdigit(wParam) && wParam!='-')
+	if (uMsg == WM_CHAR && wParam >= ' ' && !isdigit(wParam) && wParam!='-' && wParam!=',' && wParam!='.')
 		return 0;
 	if (uMsg == WM_CHAR &&  wParam == '-')
 	{
@@ -215,6 +249,27 @@ LRESULT CALLBACK subclassIntervalEditProc(HWND hWnd, UINT uMsg, WPARAM wParam,
 
 		SetWindowText(hWnd, sString.c_str());
 
+		return 0;
+	}
+	if ((uMsg == WM_CHAR &&  wParam == ',') || (uMsg == WM_CHAR &&  wParam == '.'))
+	{
+		WCHAR chString[100];
+		wstring sString;
+		int wPosition;
+		
+		SendMessage(hWnd, EM_GETSEL, (WPARAM)&wPosition, NULL);
+		GetWindowText(hWnd, chString, 100);
+		sString = chString;
+
+		int iDotPos = sString.find(L'.');
+		int iCommaPos = sString.find(L',');
+
+		if (iDotPos == string::npos && iCommaPos == string::npos)
+		{
+			sString.insert(wPosition, L".");
+			SetWindowText(hWnd, sString.c_str());
+			SendMessage(hWnd, EM_SETSEL, (WPARAM)wPosition + 1, (LPARAM)wPosition+1);
+		}
 		return 0;
 	}
 	else

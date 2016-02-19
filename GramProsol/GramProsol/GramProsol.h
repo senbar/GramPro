@@ -8,6 +8,9 @@
 HWND g_hwndPlot=NULL;
 Chart* g_cChart;
 
+//przemek-inspired GUI
+HBITMAP g_bmpTheRippedGuy;
+
 //DEBUG ONLY FUNCTION
 double QuadraticEquation(double);
 
