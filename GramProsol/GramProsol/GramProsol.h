@@ -3,12 +3,17 @@
 #include "resource.h"
 #include "cChart.h"
 #include <iostream>
-
+#include <string>
+#include <Commctrl.h>
 HWND g_hwndPlot=NULL;
 Chart* g_cChart;
 
 //DEBUG ONLY FUNCTION
 double QuadraticEquation(double);
+
+//subclassing
+LRESULT CALLBACK subclassIntervalEditProc(HWND hWnd, UINT uMsg, WPARAM wParam,
+	LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData);
 
 //todo: delete these fuckers
 #define CHART_WIDTH 400

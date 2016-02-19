@@ -6,6 +6,8 @@
 
 #define MAX_LOADSTRING 100
 
+using namespace std;
+
 // Global Variables:
 HINSTANCE hInst;                                // current instance
 WCHAR szTitle[MAX_LOADSTRING];                  // The title bar text
@@ -108,18 +110,31 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			g_hwndPlot = CreateWindowExW(NULL, L"STATIC", L"test", WS_CHILD | WS_VISIBLE | WS_BORDER, 0, 0, CHART_WIDTH, CHART_HEIGHT + 3, hWnd, (HMENU)IDC_STATIC, hInst, NULL);
 			if (g_hwndPlot == NULL)
 				throw(L"STATIC ERROR");
+
+
 			if (CreateWindowExW(NULL, L"EDIT", L"Equation edit", WS_CHILD | WS_VISIBLE | WS_BORDER, 450, 100, 300, 20, hWnd, (HMENU)IDD_EQUATION_DIALOGBAR, hInst, NULL) == NULL)
 				throw(L"EQUATION DIALOGBAR ERROR");
-			if (CreateWindowExW(NULL, L"EDIT", L"Interval from", WS_CHILD | WS_VISIBLE | WS_BORDER, 500, 150, 100, 20, hWnd, (HMENU)IDD_EQUATION_INTERVAL_FROM, hInst, NULL) == NULL)
+
+
+			if (CreateWindowExW(NULL, L"EDIT", L"", WS_CHILD | WS_VISIBLE | WS_BORDER | ES_CENTER, 550, 150, 100, 20,
+								hWnd, (HMENU)IDD_EQUATION_INTERVAL_FROM, hInst, NULL) == NULL)
 				throw(L"EQUATION INTERVAL FROM ERROR");
-			if (CreateWindowExW(NULL, L"EDIT", L"Interval to", WS_CHILD | WS_VISIBLE | WS_BORDER, 400, 150, 100, 20, hWnd, (HMENU)IDD_EQUATION_INTERVAL_TO, hInst, NULL) == NULL)
+
+
+			if (CreateWindowExW(NULL, L"EDIT", L"", WS_CHILD | WS_VISIBLE | WS_BORDER | ES_CENTER, 450, 150, 100, 20, 
+								hWnd, (HMENU)IDD_EQUATION_INTERVAL_TO, hInst, NULL) == NULL)
 				throw(L"EQUATION INTERBAL TO ERROR");
 		}
 		catch (WCHAR* cCatch)
 		{
-			MessageBoxW(NULL, L"Error", cCatch, NULL);
+			MessageBoxW(NULL, cCatch, L"Error", NULL);
 			SendMessage(hWnd, WM_DESTROY, NULL, NULL);
 		}
+
+		// setting subclasses to prevent getting characters from interval controls
+		SetWindowSubclass(GetDlgItem(hWnd, IDD_EQUATION_INTERVAL_FROM), subclassIntervalEditProc, 0, 0);
+		SetWindowSubclass(GetDlgItem(hWnd, IDD_EQUATION_INTERVAL_TO), subclassIntervalEditProc, 0, 0);
+
 		/////////////
 		//CHART CREATION 
 		/////////////
@@ -127,17 +142,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 		break;
 
-    case WM_COMMAND:
-
+	case WM_COMMAND:
+	{
 		switch (LOWORD(wParam))
 		{
-		case IDD_EQUATION_DIALOGBAR:
-			
-			break;
 
 		}
+	}
+	break;
 
-        break;
     case WM_PAINT:
         {
             PAINTSTRUCT ps;
@@ -177,6 +190,41 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     }
     return 0;
 }
+
+
+LRESULT CALLBACK subclassIntervalEditProc(HWND hWnd, UINT uMsg, WPARAM wParam,
+	LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData)
+{
+	if (uMsg == WM_CHAR && wParam >= ' ' && !isdigit(wParam) && wParam!='-')
+		return 0;
+	if (uMsg == WM_CHAR &&  wParam == '-')
+	{
+		
+		WCHAR chString[100];
+		wstring sString;
+
+		GetWindowText(hWnd, chString, 100);
+		sString = chString;
+
+		int iMinusPos = sString.find(L'-');
+
+		if (iMinusPos == string::npos)
+			sString.insert(0, L"-");
+		else
+			sString.erase(iMinusPos, 1);
+
+		SetWindowText(hWnd, sString.c_str());
+
+		return 0;
+	}
+	else
+		return DefSubclassProc(hWnd, uMsg, wParam, lParam);
+}
+
+
+
+
+
 
 //
 //
