@@ -17,6 +17,8 @@ double QuadraticEquation(double);
 //subclassing
 LRESULT CALLBACK subclassIntervalEditProc(HWND hWnd, UINT uMsg, WPARAM wParam,
 	LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData);
+LRESULT CALLBACK subclassStaticPlotProc(HWND hWnd, UINT uMsg, WPARAM wParam,
+	LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData);
 
 //todo: delete these fuckers
 #define CHART_WIDTH 400

@@ -107,11 +107,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     {
 	case WM_CREATE:
 		try {
-			g_hwndPlot = CreateWindowExW(NULL, L"STATIC", L"test", WS_CHILD | WS_VISIBLE | WS_BORDER, 0, 0, CHART_WIDTH, CHART_HEIGHT + 3, hWnd, (HMENU)IDC_STATIC, hInst, NULL);
+			g_hwndPlot = CreateWindowExW(NULL, L"STATIC", L"test", WS_CHILD | WS_VISIBLE | WS_BORDER, 0, 0, CHART_WIDTH, CHART_HEIGHT + 3, hWnd, (HMENU)IDD_STATIC_PLOT, hInst, NULL);
 			if (g_hwndPlot == NULL)
 				throw(L"STATIC ERROR");
 
-			if(CreateWindowExW(NULL, L"STATIC", L"Who bents our curves:", WS_CHILD | WS_VISIBLE, 415, 150, 400, 20, hWnd, NULL, hInst, NULL)==NULL)
+			if(CreateWindowExW(NULL, L"STATIC", L"All curves bent by this fucker:", WS_CHILD | WS_VISIBLE, 415, 150, 400, 20, hWnd, NULL, hInst, NULL)==NULL)
 				throw(L"STATIC ERROR");
 
 			if (CreateWindowExW(NULL, L"EDIT", L"Equation edit", WS_CHILD | WS_VISIBLE | WS_BORDER, 415, 25, 300, 20, hWnd, (HMENU)IDD_EQUATION_DIALOGBAR, hInst, NULL) == NULL)
@@ -140,22 +140,43 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		// setting subclasses to prevent getting characters from interval controls
 		SetWindowSubclass(GetDlgItem(hWnd, IDD_EQUATION_INTERVAL_FROM), subclassIntervalEditProc, 0, 0);
 		SetWindowSubclass(GetDlgItem(hWnd, IDD_EQUATION_INTERVAL_TO), subclassIntervalEditProc, 0, 0);
+		SetWindowSubclass(GetDlgItem(hWnd, IDD_STATIC_PLOT), subclassStaticPlotProc, 0, 0);
 
 		/////////////
 		//CHART CREATION 
 		/////////////
 		g_cChart = new Chart(&QuadraticEquation, -2, 2, RESOLUTION);
 
-		g_bmpTheRippedGuy = NULL;
+		
 		//Create that fucker
-		g_bmpTheRippedGuy = (HBITMAP) LoadImage(NULL, L"POLICJA3.BMP", IMAGE_BITMAP, 0,0, LR_LOADFROMFILE);
+		g_bmpTheRippedGuy = NULL;
+		g_bmpTheRippedGuy = (HBITMAP) LoadImage(NULL, L"POLICJA5.BMP", IMAGE_BITMAP, 0,0, LR_LOADFROMFILE);
 
 		break;
 
 	case WM_COMMAND:
 	{
+		//which window sent it
 		switch (LOWORD(wParam))
 		{
+
+
+			//button
+		case (IDD_BUTTON_EXECUTE) :
+		{
+			//the only handled action will be clicked
+			if (HIWORD(wParam) == BN_CLICKED)
+			{
+
+				g_cChart->ModifyChart(QuadraticEquation, 0, 5, RESOLUTION);
+
+				//beyond me why it works
+				InvalidateRect(NULL, NULL, 1);
+				
+			}
+			break;
+		}
+
 
 		}
 	}
@@ -164,51 +185,23 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	case WM_PAINT:
 	{
 
+		
+		BITMAP bm2;
 		PAINTSTRUCT ps;
 		HDC hdc = BeginPaint(hWnd, &ps);
 
-		EndPaint(hWnd, &ps);
-
-
-
-		PAINTSTRUCT psPlot;
-		HDC hdcPlot = BeginPaint(g_hwndPlot, &psPlot);
-
-		std::vector<Chart::DotPosition<UINT>>* LineYVector = g_cChart->getLineYVectorPtr();
-		std::vector<Chart::DotPosition<UINT>>* LineXVector = g_cChart->getLineXVectorPtr();
-		std::vector<Chart::DotPosition<UINT>>* GrainVector = g_cChart->getGrainVectorPtr();
-
-		for (int i = 0; i < RESOLUTION; i++)
-		{
-			SetPixel(hdcPlot, (*GrainVector)[i].X, RESOLUTION - (*GrainVector)[i].Y, RGB(0, 0, 0));
-
-			if (LineXVector != NULL)
-				SetPixel(hdcPlot, (*LineXVector)[i].X, (*LineXVector)[i].Y, RGB(255, 0, 0));
-			if (LineYVector != NULL)
-				SetPixel(hdcPlot, (*LineYVector)[i].X, (*LineYVector)[i].Y, RGB(255, 0, 0));
-		}
-
-		BITMAP bm2;
-
-		SetPixel(hdc, 415, 52, RGB(0, 255, 0));
+		//Regulating time
 		HDC hdcMem = CreateCompatibleDC(hdc);
 		HBITMAP hbmOld = (HBITMAP)SelectObject(hdcMem, g_bmpTheRippedGuy);
-
+		
 		GetObject(g_bmpTheRippedGuy, sizeof(bm2), &bm2);
 
-		StretchBlt(hdc, 415, 175, 300, 225, hdcMem, 0, 0, bm2.bmWidth, bm2.bmHeight, SRCCOPY);
+		BitBlt(hdc, 415, 175, bm2.bmWidth, bm2.bmHeight, hdcMem, 0, 0, SRCCOPY);
 
 		SelectObject(hdcMem, hbmOld);
 		DeleteDC(hdcMem);
 
-		EndPaint(g_hwndPlot, &psPlot);
-
-
-		//Regulating time
-
-
-		
-
+		EndPaint(hWnd, &ps);
 		
 
 	}
@@ -236,18 +229,25 @@ LRESULT CALLBACK subclassIntervalEditProc(HWND hWnd, UINT uMsg, WPARAM wParam,
 		
 		WCHAR chString[100];
 		wstring sString;
+		int iCurrentPos = 0;
 
+		SendMessage(hWnd, EM_GETSEL, (WPARAM)&iCurrentPos, NULL);
 		GetWindowText(hWnd, chString, 100);
 		sString = chString;
 
-		int iMinusPos = sString.find(L'-');
+		size_t iMinusPos = sString.find(L'-');
 
 		if (iMinusPos == string::npos)
+		{
 			sString.insert(0, L"-");
+		}
 		else
 			sString.erase(iMinusPos, 1);
 
+		
+	
 		SetWindowText(hWnd, sString.c_str());
+		SendMessage(hWnd, EM_SETSEL, (WPARAM)iCurrentPos+1, (WPARAM)iCurrentPos+1);
 
 		return 0;
 	}
@@ -261,15 +261,43 @@ LRESULT CALLBACK subclassIntervalEditProc(HWND hWnd, UINT uMsg, WPARAM wParam,
 		GetWindowText(hWnd, chString, 100);
 		sString = chString;
 
-		int iDotPos = sString.find(L'.');
-		int iCommaPos = sString.find(L',');
+		size_t iDotPos = sString.find(L'.');
+		size_t iCommaPos = sString.find(L',');
+		size_t iMinusPos = sString.find(L'-');
 
 		if (iDotPos == string::npos && iCommaPos == string::npos)
 		{
-			sString.insert(wPosition, L".");
+			if (iMinusPos != string::npos && wPosition == 0)// TODO MODIFY THIS SHIT
+			{
+				
+				sString.insert(wPosition + 1, L"0.");
+			}
+			else
+				sString.insert(wPosition, L".");
+
 			SetWindowText(hWnd, sString.c_str());
 			SendMessage(hWnd, EM_SETSEL, (WPARAM)wPosition + 1, (LPARAM)wPosition+1);
 		}
+		return 0;
+	}
+	if (uMsg == WM_CHAR)
+	{
+		WCHAR chText[256];
+		wstring stdText;
+
+		DefSubclassProc(hWnd, uMsg, wParam, lParam);
+
+		GetWindowText(hWnd, chText, 256);
+		stdText = chText;
+
+	    size_t iMinusPos = stdText.find(L"-");
+		if (iMinusPos > 0 && iMinusPos != string::npos)
+		{
+  			stdText.erase(iMinusPos, 1);
+			stdText.insert(0, L"-");
+			SetWindowText(hWnd, stdText.c_str());
+		}
+
 		return 0;
 	}
 	else
@@ -277,7 +305,39 @@ LRESULT CALLBACK subclassIntervalEditProc(HWND hWnd, UINT uMsg, WPARAM wParam,
 }
 
 
+LRESULT CALLBACK subclassStaticPlotProc(HWND hWnd, UINT uMsg, WPARAM wParam,
+	LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData)
+{
+	if (uMsg == WM_PAINT)
+	{
+		PAINTSTRUCT psPlot;
+		HDC hdcPlot = BeginPaint(hWnd, &psPlot);
 
+		std::vector<Chart::DotPosition<UINT>>* LineYVector = g_cChart->getLineYVectorPtr();
+		std::vector<Chart::DotPosition<UINT>>* LineXVector = g_cChart->getLineXVectorPtr();
+		std::vector<Chart::DotPosition<UINT>>* GrainVector = g_cChart->getGrainVectorPtr();
+
+		for (int i = 0; i < RESOLUTION; i++)
+		{
+			SetPixel(hdcPlot, (*GrainVector)[i].X, RESOLUTION - (*GrainVector)[i].Y, RGB(0, 0, 0));
+
+			if (LineXVector != NULL)
+				SetPixel(hdcPlot, (*LineXVector)[i].X, (*LineXVector)[i].Y, RGB(255, 0, 0));
+			if (LineYVector != NULL)
+				SetPixel(hdcPlot, (*LineYVector)[i].X, (*LineYVector)[i].Y, RGB(255, 0, 0));
+		}
+
+
+
+		SetPixel(hdcPlot, 415, 52, RGB(0, 255, 0));
+		
+		EndPaint(hWnd, &psPlot);
+	
+		return 0;
+		
+	}
+	return DefSubclassProc(hWnd, uMsg, wParam, lParam);
+}
 
 
 

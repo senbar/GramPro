@@ -6,7 +6,9 @@ using namespace std;
 
 Chart::Chart(double(*f_pEquation_h)(double), double dIntervalA_h, double dIntervalB_h, UINT uResolution) 
 {
-	
+	LineXVector = NULL;
+	LineYVector = NULL;
+	GrainVector = NULL;
 	if (!this->ModifyChart(f_pEquation_h, dIntervalA_h, dIntervalB_h, uResolution))
 	{
 		MessageBox(NULL, L"error creating Chart class", L"ERR0R", NULL);
@@ -79,6 +81,10 @@ std::vector<Chart::DotPosition<UINT>>* Chart::createLineYVector(UINT uResolution
 
 BOOL Chart::ModifyChart(double (*f_pEquation_h)(double), double dIntervalA_h, double dIntervalB_h, UINT uResolution)
 {
+	delete LineYVector;
+	delete LineXVector;
+	delete GrainVector;
+
 	if (dIntervalA_h > dIntervalB_h)
 		return 0;
 
