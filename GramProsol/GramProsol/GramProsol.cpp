@@ -168,7 +168,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			if (HIWORD(wParam) == BN_CLICKED)
 			{
 
-				g_cChart->ModifyChart(QuadraticEquation, 0, 5, RESOLUTION);
+				g_cChart->ModifyChart(QuadraticEquation, 
+										GetIntervalFromWindow(GetDlgItem(hWnd, IDD_EQUATION_INTERVAL_FROM)), 
+										GetIntervalFromWindow(GetDlgItem(hWnd, IDD_EQUATION_INTERVAL_TO)),
+										RESOLUTION);
 
 				//beyond me why it works
 				InvalidateRect(NULL, NULL, 1);
@@ -219,6 +222,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 }
 
 
+
+
+
+
+//subclassing
 LRESULT CALLBACK subclassIntervalEditProc(HWND hWnd, UINT uMsg, WPARAM wParam,
 	LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData)
 {
@@ -338,6 +346,39 @@ LRESULT CALLBACK subclassStaticPlotProc(HWND hWnd, UINT uMsg, WPARAM wParam,
 	}
 	return DefSubclassProc(hWnd, uMsg, wParam, lParam);
 }
+
+
+
+
+
+double GetIntervalFromWindow(HWND hwndEdit)
+{
+	WCHAR chText[20];
+	wstring sText;
+	wstringstream ssStream;
+
+	bool MinusFlag=0;
+	double dResult = 0;
+
+	GetWindowText(hwndEdit, chText, 20);
+	sText = chText;
+
+	if (sText[0] == L'-')
+	{
+		MinusFlag = 1;
+		sText[0] = L'0';
+	}
+
+	ssStream << sText;
+	ssStream >> dResult;
+
+	if (MinusFlag)
+		dResult *= -1;
+	return dResult;
+}
+
+
+
 
 
 
