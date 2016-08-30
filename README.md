@@ -1,2 +1,2 @@
 # GramPro
-0wning integrals
+Integral solver with graph drawing, uder development
